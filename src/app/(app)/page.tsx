@@ -1,5 +1,6 @@
 'use client';
 
+
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Calendar, TrendingUp, ChevronRight, Wallet, Target, Trophy } from 'lucide-react';
@@ -135,8 +136,7 @@ export default function HomePage() {
             <div className="space-y-2">
               {MEAL_TYPES.map((mt) => {
                 const meal = expenses?.meals?.find(
-                  (m: ExpenseMeal & { expense_meal_items: ExpenseMealItem[] }) =>
-                    m.meal_type === mt.value
+                  (m: ExpenseMeal & { expense_meal_items: ExpenseMealItem[] }) => m.meal_type === mt.value
                 );
                 const amount = meal ? Number(meal.total_cost || 0) : 0;
 

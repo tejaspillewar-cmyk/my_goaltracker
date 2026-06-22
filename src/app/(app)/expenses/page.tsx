@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import { useState } from 'react';
@@ -110,8 +112,7 @@ export default function ExpensesPage() {
           </h2>
           {MEAL_TYPES.map((mt) => {
             const meal = expenses?.meals?.find(
-              (m: ExpenseMeal & { expense_meal_items: ExpenseMealItem[] }) =>
-                m.meal_type === mt.value
+              (m: ExpenseMeal & { expense_meal_items: ExpenseMealItem[] }) => m.meal_type === mt.value
             );
             return (
               <MealCard

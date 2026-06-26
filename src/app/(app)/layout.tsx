@@ -2,6 +2,7 @@
 
 import { QueryProvider } from '@/lib/query-provider';
 import { AuthProvider } from '@/hooks/use-auth';
+import { ThemeProvider } from '@/hooks/use-theme';
 import { Sidebar } from '@/components/layout/sidebar';
 
 export default function AppLayout({
@@ -12,10 +13,12 @@ export default function AppLayout({
   return (
     <QueryProvider>
       <AuthProvider>
-        <Sidebar />
-        <main className="flex-1">
-          {children}
-        </main>
+        <ThemeProvider>
+          <Sidebar />
+          <main className="flex-1">
+            {children}
+          </main>
+        </ThemeProvider>
       </AuthProvider>
     </QueryProvider>
   );

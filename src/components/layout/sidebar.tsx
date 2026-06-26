@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, CheckSquare, Wallet, BarChart3, User, Settings, Menu, X } from 'lucide-react';
+import { Home, CheckSquare, Wallet, Bell, User, Settings, Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useTheme } from '@/hooks/use-theme';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/habits', label: 'Habits', icon: CheckSquare },
-  { href: '/expenses', label: 'Expenses', icon: Wallet },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/',          label: 'Home',      icon: Home },
+  { href: '/expenses',  label: 'Expenses',  icon: Wallet },
+  { href: '/habits',    label: 'Habits',    icon: CheckSquare },
+  { href: '/reminders', label: 'Reminders', icon: Bell },
+  { href: '/profile',   label: 'Profile',   icon: User },
 ];
 
 const adminItem = { href: '/admin', label: 'Admin', icon: Settings };

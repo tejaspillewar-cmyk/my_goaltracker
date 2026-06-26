@@ -2,29 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, CheckSquare, Wallet, BarChart3, User, Settings } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+import { Home, Wallet, CheckSquare, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Home },
-  { href: '/habits', label: 'Habits', icon: CheckSquare },
-  { href: '/expenses', label: 'Expenses', icon: Wallet },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/',          label: 'Home',     icon: Home },
+  { href: '/expenses',  label: 'Expenses', icon: Wallet },
+  { href: '/habits',    label: 'Habits',   icon: CheckSquare },
+  { href: '/reminders', label: 'Reminders',icon: Bell },
 ];
-
-const adminItem = { href: '/admin', label: 'Admin', icon: Settings };
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { isAdmin } = useAuth();
-
-  const items = isAdmin ? [...navItems, adminItem] : navItems;
 
   return (
     <nav className="bottom-nav" id="bottom-navigation">
-      {items.map((item) => {
+      {navItems.map((item) => {
         const isActive =
           item.href === '/'
             ? pathname === '/'
@@ -45,7 +38,7 @@ export function BottomNav() {
               />
             )}
             <div className="bottom-nav-icon">
-              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+              <item.icon style={{ width: 20, height: 20 }} strokeWidth={isActive ? 2.5 : 2} />
             </div>
             <span className="bottom-nav-label">{item.label}</span>
           </Link>

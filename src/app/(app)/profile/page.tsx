@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { User, Lock, Loader2, LogOut, Check } from 'lucide-react';
+import { Lock, Loader2, LogOut, Check, Settings, Sun, Moon } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function ProfilePage() {
-  const { user, signOut, isLoading } = useAuth();
+  const { user, isAdmin, signOut, isLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changing, setChanging] = useState(false);
@@ -17,17 +20,8 @@ export default function ProfilePage() {
     e.preventDefault();
     setError('');
     setSuccess(false);
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
+    if (newPassword !== confirmPassword) { setError('Passwords do not match'); return; }
+    if (newPassword.length < 6) { setError('Password must be at least 6 characters'); return; }
     setChanging(true);
     try {
       const res = await fetch('/api/auth/change-password', {
@@ -35,12 +29,7 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword }),
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to change password');
-      }
-
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Failed'); }
       setSuccess(true);
       setNewPassword('');
       setConfirmPassword('');
@@ -63,12 +52,9 @@ export default function ProfilePage() {
 
   return (
     <div className="page-content pt-6">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-5"
-      >
-        {/* Header */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+
+        {/* Avatar + name */}
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold"
@@ -79,10 +65,34 @@ export default function ProfilePage() {
           <div>
             <h1 className="text-xl font-bold">{user?.display_name}</h1>
             <p className="text-xs" style={{ color: 'var(--foreground-muted)' }}>
-              {user?.role === 'admin' ? '⚡ Admin' : '👤 User'}
+              {isAdmin ? '⚡ Admin' : '👤 User'}
             </p>
           </div>
         </div>
+
+        {/* Theme toggle */}
+        <div className="glass-card p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {theme === 'light' ? <Sun className="w-4 h-4" style={{ color: 'var(--accent-secondary)' }} /> : <Moon className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />}
+            <span className="text-sm font-medium">{theme === 'light' ? 'Light Mode' : 'Dark Mode'}</span>
+          </div>
+          <button onClick={toggleTheme} className="btn-secondary btn-sm">
+            Switch to {theme === 'light' ? 'Dark' : 'Light'}
+          </button>
+        </div>
+
+        {/* Admin Settings */}
+        {isAdmin && (
+          <Link href="/admin" style={{ textDecoration: 'none' }}>
+            <div className="glass-card p-4 flex items-center justify-between" style={{ cursor: 'pointer' }}>
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4" style={{ color: 'var(--accent-primary)' }} />
+                <span className="text-sm font-medium">Admin Settings</span>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--foreground-muted)' }}>→</span>
+            </div>
+          </Link>
+        )}
 
         {/* Change Password */}
         <div className="glass-card p-5">
@@ -92,59 +102,36 @@ export default function ProfilePage() {
               Change Password
             </h2>
           </div>
-
           <form onSubmit={handleChangePassword} className="space-y-3">
             <div>
               <label htmlFor="new-password" className="input-label">New Password</label>
-              <input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="input-field"
-                placeholder="At least 6 characters"
-                required
-                minLength={6}
-              />
+              <input id="new-password" type="password" value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="input-field" placeholder="At least 6 characters" required minLength={6} />
             </div>
             <div>
               <label htmlFor="confirm-password" className="input-label">Confirm Password</label>
-              <input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="input-field"
-                placeholder="Repeat your password"
-                required
-              />
+              <input id="confirm-password" type="password" value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="input-field" placeholder="Repeat your password" required />
             </div>
-
-            {error && (
-              <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>
-            )}
+            {error && <p className="text-sm" style={{ color: 'var(--danger)' }}>{error}</p>}
             {success && (
               <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--success)' }}>
-                <Check className="w-4 h-4" />
-                Password changed successfully!
+                <Check className="w-4 h-4" /> Password changed successfully!
               </div>
             )}
-
             <button type="submit" disabled={changing} className="btn-primary w-full">
-              {changing ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Changing...</>
-              ) : (
-                'Update Password'
-              )}
+              {changing ? <><Loader2 className="w-4 h-4 animate-spin" /> Changing...</> : 'Update Password'}
             </button>
           </form>
         </div>
 
         {/* Sign Out */}
         <button onClick={signOut} className="btn-danger w-full">
-          <LogOut className="w-4 h-4" />
-          Sign Out
+          <LogOut className="w-4 h-4" /> Sign Out
         </button>
+
       </motion.div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { QueryProvider } from '@/lib/query-provider';
 import { AuthProvider } from '@/hooks/use-auth';
-import { BottomNav } from '@/components/layout/bottom-nav';
+import { Sidebar } from '@/components/layout/sidebar';
 
 export default function AppLayout({
   children,
@@ -12,10 +12,10 @@ export default function AppLayout({
   return (
     <QueryProvider>
       <AuthProvider>
+        <Sidebar />
         <main className="flex-1">
           {children}
         </main>
-        <BottomNav />
       </AuthProvider>
     </QueryProvider>
   );

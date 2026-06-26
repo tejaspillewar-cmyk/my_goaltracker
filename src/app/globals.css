@@ -382,59 +382,125 @@ body {
 }
 
 /* ============================================================================
-   Bottom Navigation
+   Sidebar Navigation
    ============================================================================ */
 
-.bottom-nav {
+/* Hamburger toggle button — fixed top-left */
+.sidebar-toggle {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--nav-height);
-  background: rgba(9, 9, 11, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--card-border);
+  top: 16px;
+  left: 16px;
+  z-index: 60;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(24, 24, 27, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  color: var(--foreground);
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 0 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(39, 39, 42, 0.9);
+  border-color: rgba(82, 82, 91, 0.6);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Backdrop overlay */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 50;
 }
 
-.bottom-nav-item {
+/* Sidebar pill — vertical nav card */
+.sidebar-pill {
+  position: fixed;
+  top: 72px;
+  left: 16px;
+  z-index: 55;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  color: var(--foreground-subtle);
-  text-decoration: none;
-  font-size: 11px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  min-width: 44px;
-  min-height: 44px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  gap: 2px;
 }
 
-.bottom-nav-item.active {
+/* Individual nav item */
+.sidebar-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: var(--foreground-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-height: 48px;
+  overflow: hidden;
+}
+
+.sidebar-nav-item:hover {
+  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-nav-item.active {
   color: var(--accent-primary);
 }
 
-.bottom-nav-item:hover {
-  color: var(--foreground-muted);
+.sidebar-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.sidebar-nav-label {
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+/* Active indicator bar */
+.sidebar-active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-primary);
 }
 
 /* ============================================================================
-   Page Content (accounts for bottom nav)
+   Page Content
    ============================================================================ */
 
 .page-content {
   padding: var(--page-padding);
-  padding-bottom: calc(var(--nav-height) + 24px);
+  padding-bottom: 24px;
   max-width: 480px;
   margin: 0 auto;
   width: 100%;

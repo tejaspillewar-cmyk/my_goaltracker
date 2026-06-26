@@ -6,11 +6,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import { MealCard } from '@/components/expenses/meal-card';
+import { BudgetLimitCard } from '@/components/expenses/budget-limit-card';
+import { OtherExpenseCard } from '@/components/expenses/other-expense-card';
 import { useExpenses } from '@/hooks/use-expenses';
 import { useAuth } from '@/hooks/use-auth';
 import { getISTToday, formatISTDate, getDayNameFull } from '@/lib/utils/date';
-import { MEAL_TYPES, CURRENCY_SYMBOL } from '@/lib/utils/constants';
-import type { ExpenseMeal, ExpenseMealItem } from '@/types';
+import { MEAL_TYPES, EXPENSE_CATEGORIES, CURRENCY_SYMBOL } from '@/lib/utils/constants';
+import type { ExpenseMeal, ExpenseMealItem, ExpenseOther } from '@/types';
 
 export default function ExpensesPage() {
   const [date, setDate] = useState(getISTToday());
@@ -105,6 +107,11 @@ export default function ExpensesPage() {
           </div>
         )}
 
+        {/* Budget Limit */}
+        {!isLoading && expenses && (
+          <BudgetLimitCard date={date} totalExpenses={expenses.grand_total} />
+        )}
+
         {/* Meal Cards */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--foreground-muted)' }}>
@@ -126,6 +133,28 @@ export default function ExpensesPage() {
             );
           })}
         </div>
+
+        {/* Other Expenses */}
+        {!isLoading && expenses && (
+          <div className="space-y-3 pt-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--foreground-muted)' }}>
+              Other Expenses
+            </h2>
+            {EXPENSE_CATEGORIES.map((cat) => {
+              const catExpenses = expenses.others?.filter((e: ExpenseOther) => e.category === cat.value) || [];
+              return (
+                <OtherExpenseCard
+                  key={cat.value}
+                  category={cat.value}
+                  label={cat.label}
+                  emoji={cat.emoji}
+                  date={date}
+                  expenses={catExpenses}
+                />
+              );
+            })}
+          </div>
+        )}
       </motion.div>
     </div>
   );

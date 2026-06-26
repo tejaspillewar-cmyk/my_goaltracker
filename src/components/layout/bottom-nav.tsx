@@ -37,18 +37,17 @@ export function BottomNav() {
             className={`bottom-nav-item ${isActive ? 'active' : ''}`}
             id={`nav-${item.label.toLowerCase()}`}
           >
-            <div className="relative">
-              <item.icon className="w-5 h-5" />
-              {isActive && (
-                <motion.div
-                  layoutId="nav-indicator"
-                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                  style={{ background: 'var(--accent-primary)' }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                />
-              )}
+            {isActive && (
+              <motion.div
+                layoutId="bottom-nav-pill"
+                className="bottom-nav-active-bg"
+                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+              />
+            )}
+            <div className="bottom-nav-icon">
+              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
             </div>
-            <span>{item.label}</span>
+            <span className="bottom-nav-label">{item.label}</span>
           </Link>
         );
       })}

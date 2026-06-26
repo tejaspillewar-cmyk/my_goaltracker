@@ -583,6 +583,13 @@ body {
   width: 100%;
 }
 
+@media (max-width: 768px) {
+  .page-content {
+    padding-left: var(--page-padding);
+    padding-top: calc(56px + 16px + var(--page-padding));
+  }
+}
+
 /* ============================================================================
    Animations
    ============================================================================ */

@@ -585,8 +585,9 @@ body {
 
 @media (max-width: 768px) {
   .page-content {
-    padding-left: var(--page-padding);
-    padding-top: calc(56px + 16px + var(--page-padding));
+    padding-left: calc(56px + 16px + var(--page-padding));
+    padding-top: var(--page-padding);
+    max-width: 100%;
   }
 }
 

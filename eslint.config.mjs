@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Utility seed/check scripts (not part of the app):
+    "seed-test.js",
+    "check-seed.js",
   ]),
 ]);
 

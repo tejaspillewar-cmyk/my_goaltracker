@@ -4,7 +4,7 @@
 // Auth context — provides current user info to client components
 // ============================================================================
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useRef, type ReactNode } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@/types';
 
@@ -28,12 +28,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [authId, setAuthId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+
+  // Create the client once and keep it stable — never recreate it on re-render
+  const supabase = useRef(createClient()).current;
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadUser() {
       try {
         const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (cancelled) return;
 
         if (authUser) {
           setAuthId(authUser.id);
@@ -43,14 +49,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .eq('auth_id', authUser.id)
             .single();
 
-          if (userData) {
+          if (!cancelled && userData) {
             setUser(userData as User);
           }
         }
       } catch (error) {
         console.error('Error loading user:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
@@ -76,8 +82,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // stable client ref — no deps needed
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -86,16 +96,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/login';
   };
 
+  // Memoize context value so consumers don't re-render unless something actually changed
+  const value = useMemo(() => ({
+    user,
+    authId,
+    isAdmin: user?.role === 'admin',
+    isLoading,
+    signOut,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [user, authId, isLoading]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        authId,
-        isAdmin: user?.role === 'admin',
-        isLoading,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

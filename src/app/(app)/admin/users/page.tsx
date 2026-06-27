@@ -206,7 +206,7 @@ export default function AdminUsersPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 100 }}
                 className="fixed bottom-0 left-0 right-0 z-50 p-4"
-                style={{ maxWidth: '480px', margin: '0 auto' }}
+                style={{ maxWidth: '480px', margin: '0 auto', paddingBottom: 'max(16px, env(safe-area-inset-bottom, 16px))' }}
               >
                 <div className="glass-card p-6">
                   <div className="flex items-center justify-between mb-5">

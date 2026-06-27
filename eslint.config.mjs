@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     // Utility seed/check scripts (not part of the app):
     "seed-test.js",
     "check-seed.js",
+    "generate-vapid-keys.js",
   ]),
 ]);
 

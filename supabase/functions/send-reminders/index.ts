@@ -21,10 +21,11 @@ webPush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 Deno.serve(async (_req) => {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  // Current UTC time as 'HH:MM:00'
+  // Current IST time as 'HH:MM:00' (UTC+5:30)
   const now = new Date();
-  const hh = String(now.getUTCHours()).padStart(2, '0');
-  const mm = String(now.getUTCMinutes()).padStart(2, '0');
+  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
+  const hh = String(ist.getUTCHours()).padStart(2, '0');
+  const mm = String(ist.getUTCMinutes()).padStart(2, '0');
   const currentTime = `${hh}:${mm}:00`;
 
   // Fetch enabled reminders matching this minute

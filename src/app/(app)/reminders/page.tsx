@@ -150,12 +150,15 @@ export default function RemindersPage() {
             >
               <button
                 onClick={() => toggleReminder.mutate({ id: r.id, enabled: !r.enabled })}
+                disabled={toggleReminder.isPending}
                 style={{
-                  width: 22, height: 22, borderRadius: 6, flexShrink: 0, cursor: 'pointer',
+                  width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                  cursor: toggleReminder.isPending ? 'wait' : 'pointer',
                   border: `2px solid ${r.enabled ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)'}`,
                   background: r.enabled ? 'var(--accent-primary)' : 'transparent',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'all 0.2s',
+                  opacity: toggleReminder.isPending ? 0.6 : 1,
                 }}
               >
                 {r.enabled && <Check style={{ width: 12, height: 12, color: '#fff' }} />}
@@ -172,9 +175,10 @@ export default function RemindersPage() {
 
               <button
                 onClick={() => deleteReminder.mutate(r.id)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--foreground-subtle)' }}
+                disabled={deleteReminder.isPending}
+                style={{ background: 'none', border: 'none', cursor: deleteReminder.isPending ? 'wait' : 'pointer', padding: 4, color: 'var(--foreground-subtle)', opacity: deleteReminder.isPending ? 0.6 : 1 }}
               >
-                <Trash2 style={{ width: 14, height: 14 }} />
+                {deleteReminder.isPending ? <Loader2 style={{ width: 14, height: 14 }} className="animate-spin" /> : <Trash2 style={{ width: 14, height: 14 }} />}
               </button>
             </motion.div>
           ))}

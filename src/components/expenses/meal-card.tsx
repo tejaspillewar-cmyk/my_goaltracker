@@ -145,10 +145,10 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
               <div className="flex gap-2">
                 <button
                   onClick={handleAddItem}
-                  disabled={!newDesc.trim() || !newAmount || addItem.isPending}
+                  disabled={!newDesc.trim() || !newAmount || addItem.isPending || createSession.isPending}
                   className="btn-primary btn-sm flex-1"
                 >
-                  {addItem.isPending ? (
+                  {(addItem.isPending || createSession.isPending) ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
                     'Add'

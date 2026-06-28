@@ -7,6 +7,7 @@ import { Calendar, User, Bell, Plus, CheckSquare, Wallet } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { useDailyScore, useGoals, useGoalEntries, useLeaderboard, useToggleEntry } from '@/hooks/use-goals';
 import { useExpenses } from '@/hooks/use-expenses';
+import { useReminders } from '@/hooks/use-reminders';
 import { getISTToday, getDayNameFull, formatISTDate, getISTMonthYear } from '@/lib/utils/date';
 import { CURRENCY_SYMBOL } from '@/lib/utils/constants';
 import type { LeaderboardEntry, Goal, GoalEntry, ExpenseMeal, ExpenseMealItem } from '@/types';
@@ -213,7 +214,8 @@ function HabitsCard({ goals, entries, date }: { goals: Goal[]; entries: GoalEntr
                   <button
                     key={goal.id}
                     onClick={e => { e.stopPropagation(); toggle.mutate({ goal_id: goal.id, entry_date: date, is_checked: !done }); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '2px 0', width: '100%' }}
+                    disabled={toggle.isPending}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: toggle.isPending ? 'wait' : 'pointer', textAlign: 'left', padding: '2px 0', width: '100%', opacity: toggle.isPending ? 0.6 : 1 }}
                   >
                     <div style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${done ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)'}`, background: done ? 'var(--accent-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                       {done && <span style={{ color: '#000', fontSize: 8, fontWeight: 900, lineHeight: 1 }}>✓</span>}
@@ -234,37 +236,44 @@ function HabitsCard({ goals, entries, date }: { goals: Goal[]; entries: GoalEntr
 }
 
 // ============================================================================
-// Reminders Card (placeholder — backend coming later)
+// Reminders Card — live from Supabase
 // ============================================================================
-function RemindersCard() {
+function RemindersCard({ reminders }: { reminders: { id: string; text: string; reminder_time: string; enabled: boolean }[] }) {
   const router = useRouter();
-  const reminders = [
-    { id: 1, text: 'Log dinner expenses', time: '9:00 PM' },
-    { id: 2, text: 'Evening workout', time: '6:00 PM' },
-  ];
+  const active = reminders.filter(r => r.enabled);
+
+  const fmtTime = (t: string) => {
+    const [h, m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`;
+  };
 
   return (
     <FlipCard
       front={
         <div style={{ ...face, alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <Bell style={{ width: 20, height: 20, color: '#2dd4ff', opacity: 0.75 }} />
-          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--foreground)', lineHeight: 1 }}>{reminders.length}</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--foreground)', lineHeight: 1 }}>{active.length}</div>
           <div style={{ ...label, marginBottom: 0 }}>Reminders</div>
         </div>
       }
       back={
         <div style={face}>
-          <div style={label}>Upcoming</div>
+          <div style={label}>Active</div>
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {reminders.map(r => (
-              <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                <div style={{ width: 13, height: 13, borderRadius: 3, border: '1.5px solid rgba(45,212,255,0.35)', flexShrink: 0, marginTop: 1 }} />
-                <div>
-                  <div style={{ fontSize: 11, color: 'var(--foreground)', fontWeight: 500 }}>{r.text}</div>
-                  <div style={{ fontSize: 9, color: 'var(--foreground-subtle)' }}>{r.time}</div>
+            {active.length === 0 ? (
+              <div style={{ fontSize: 11, color: 'var(--foreground-subtle)', textAlign: 'center', marginTop: 10 }}>No reminders set</div>
+            ) : (
+              active.slice(0, 4).map(r => (
+                <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                  <div style={{ width: 13, height: 13, borderRadius: 3, border: '1.5px solid rgba(45,212,255,0.35)', flexShrink: 0, marginTop: 1 }} />
+                  <div>
+                    <div style={{ fontSize: 11, color: 'var(--foreground)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100 }}>{r.text}</div>
+                    <div style={{ fontSize: 9, color: 'var(--foreground-subtle)' }}>{fmtTime(r.reminder_time)}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <button
             onClick={e => { e.stopPropagation(); router.push('/reminders'); }}
@@ -291,6 +300,7 @@ export default function HomePage() {
   const { data: leaderboard } = useLeaderboard(month, year);
   const { data: goals = [] } = useGoals();
   const { data: entries = [] } = useGoalEntries(today);
+  const { data: reminders = [] } = useReminders();
 
   if (authLoading) {
     return (
@@ -331,7 +341,7 @@ export default function HomePage() {
         />
         <ExpensesCard expenses={expenses} />
         <HabitsCard goals={goals as Goal[]} entries={entries as GoalEntry[]} date={today} />
-        <RemindersCard />
+        <RemindersCard reminders={reminders} />
       </div>
     </div>
   );

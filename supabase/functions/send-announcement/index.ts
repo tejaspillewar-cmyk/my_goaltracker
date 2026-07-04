@@ -1,5 +1,5 @@
 // Supabase Edge Function — send-announcement
-// Called by the admin to push a broadcast notification to all subscribed users.
+// Called by the admin to push a broadcast notification to all or selected users.
 // Deploy: supabase functions deploy send-announcement
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -22,11 +22,13 @@ Deno.serve(async (req) => {
 
   let title = '📢 Announcement';
   let body  = '';
+  let userIds: string[] | null = null;
 
   try {
     const json = await req.json();
-    title = json.title || title;
-    body  = json.body  || body;
+    title   = json.title   || title;
+    body    = json.body    || body;
+    userIds = json.userIds || null;
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
   }
@@ -37,10 +39,16 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  // Fetch all push subscriptions
-  const { data: subs, error } = await supabase
+  // Fetch push subscriptions — filtered by user IDs if provided, otherwise all
+  let query = supabase
     .from('push_subscriptions')
     .select('subscription');
+
+  if (userIds && Array.isArray(userIds) && userIds.length > 0) {
+    query = query.in('user_id', userIds);
+  }
+
+  const { data: subs, error } = await query;
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });

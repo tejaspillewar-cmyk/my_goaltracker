@@ -5,6 +5,7 @@ export interface Reminder {
   id: string;
   text: string;
   reminder_time: string; // 'HH:MM:SS'
+  days: number[];        // 0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
   enabled: boolean;
   created_at: string;
 }
@@ -28,7 +29,7 @@ export function useCreateReminder() {
   const supabase = createClient();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { text: string; reminder_time: string }) => {
+    mutationFn: async (payload: { text: string; reminder_time: string; days: number[] }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
       const { data, error } = await supabase

@@ -21,19 +21,21 @@ webPush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 Deno.serve(async (_req) => {
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  // Current IST time as 'HH:MM:00' (UTC+5:30)
+  // Current IST time + day-of-week (UTC+5:30)
   const now = new Date();
   const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
   const hh = String(ist.getUTCHours()).padStart(2, '0');
   const mm = String(ist.getUTCMinutes()).padStart(2, '0');
   const currentTime = `${hh}:${mm}:00`;
+  const currentDay  = ist.getUTCDay(); // 0=Sun … 6=Sat
 
-  // Fetch enabled reminders matching this minute
+  // Fetch enabled reminders matching this minute AND today's day
   const { data: reminders, error: remErr } = await supabase
     .from('reminders')
-    .select('id, text, user_id')
+    .select('id, text, user_id, days')
     .eq('enabled', true)
-    .eq('reminder_time', currentTime);
+    .eq('reminder_time', currentTime)
+    .contains('days', [currentDay]);
 
   if (remErr) {
     console.error('DB error:', remErr.message);

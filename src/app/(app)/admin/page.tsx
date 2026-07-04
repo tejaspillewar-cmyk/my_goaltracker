@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Users, Target, ScrollText, ChevronRight, Shield } from 'lucide-react';
+import { Users, Target, ScrollText, ChevronRight, Shield, Megaphone, Loader2, Check } from 'lucide-react';
 
 const adminSections = [
   {
@@ -31,6 +32,56 @@ const adminSections = [
   },
 ];
 
+function AnnouncementCard() {
+  const [title, setTitle] = useState('');
+  const [body, setBody]   = useState('');
+  const [sending, setSending]   = useState(false);
+  const [sent, setSent]         = useState(false);
+  const [error, setError]       = useState('');
+
+  const handleSend = async () => {
+    if (!body.trim()) return;
+    setSending(true); setError(''); setSent(false);
+    try {
+      const res = await fetch('/api/admin/announce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title.trim() || '📢 Announcement', body: body.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send');
+      setSent(true);
+      setTitle(''); setBody('');
+      setTimeout(() => setSent(false), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="glass-card p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <Megaphone className="w-4 h-4" style={{ color: 'var(--accent-secondary)' }} />
+        <h2 className="text-sm font-semibold">Send Announcement</h2>
+        <span className="text-xs" style={{ color: 'var(--foreground-muted)' }}>— push to all users</span>
+      </div>
+      <input type="text" className="input-field" placeholder="Title (optional)"
+        value={title} onChange={e => setTitle(e.target.value)} maxLength={60} />
+      <textarea className="input-field" placeholder="Message…" rows={3}
+        value={body} onChange={e => setBody(e.target.value)} maxLength={200}
+        style={{ resize: 'none' }} />
+      {error && <p className="text-xs" style={{ color: 'var(--danger)' }}>{error}</p>}
+      <button onClick={handleSend} disabled={!body.trim() || sending} className="btn-primary w-full">
+        {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+          : sent    ? <><Check className="w-4 h-4" /> Sent!</>
+          : <><Megaphone className="w-4 h-4" /> Send to all users</>}
+      </button>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   return (
     <div className="page-content pt-6">
@@ -54,6 +105,9 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
+
+        {/* Announcement */}
+        <AnnouncementCard />
 
         {/* Sections */}
         <div className="space-y-3">

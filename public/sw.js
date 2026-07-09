@@ -1,6 +1,17 @@
 // Service Worker for Web Push Notifications
 // Handles incoming push events and shows OS-level notifications
 
+// ── Update behaviour ────────────────────────────────────────────────────────
+// skipWaiting: new SW activates immediately instead of waiting for all tabs to close
+// clients.claim: the new SW takes control of every open page right away
+// Together these ensure that after a Vercel deploy the home-screen PWA picks up
+// the new version on the very next app launch (no reinstall needed).
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) =>
+  event.waitUntil(self.clients.claim())
+);
+// ────────────────────────────────────────────────────────────────────────────
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 

@@ -33,6 +33,14 @@ async function deleteJSON(url: string): Promise<void> {
   }
 }
 
+export function useMonthlyDays(month: number, year: number) {
+  return useQuery<{ date: string; total: number }[]>({
+    queryKey: ['expenses-monthly-days', year, month],
+    queryFn: () => fetchJSON(`/api/expenses/monthly-days?month=${month}&year=${year}`),
+    enabled: !!month && !!year,
+  });
+}
+
 export function useExpenses(date: string) {
   return useQuery<ExpenseDaySummary>({
     queryKey: ['expenses', date],

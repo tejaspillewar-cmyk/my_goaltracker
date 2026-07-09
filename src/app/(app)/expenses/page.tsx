@@ -7,11 +7,12 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Wallet } from 'lucide-react';
 import { MealCard } from '@/components/expenses/meal-card';
 import { BudgetLimitCard } from '@/components/expenses/budget-limit-card';
+import { DayTotalCard } from '@/components/expenses/day-total-card';
 import { OtherExpenseCard } from '@/components/expenses/other-expense-card';
 import { useExpenses } from '@/hooks/use-expenses';
 import { useAuth } from '@/hooks/use-auth';
 import { getISTToday, formatISTDate, getDayNameFull } from '@/lib/utils/date';
-import { MEAL_TYPES, EXPENSE_CATEGORIES, CURRENCY_SYMBOL } from '@/lib/utils/constants';
+import { MEAL_TYPES, EXPENSE_CATEGORIES } from '@/lib/utils/constants';
 import type { ExpenseMeal, ExpenseMealItem, ExpenseOther } from '@/types';
 
 export default function ExpensesPage() {
@@ -93,18 +94,9 @@ export default function ExpensesPage() {
           </button>
         </div>
 
-        {/* Day Total */}
+        {/* Day Total — expandable card with carry-forward + monthly overview */}
         {!isLoading && expenses && (
-          <div className="glass-card p-4 glow-amber">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium" style={{ color: 'var(--foreground-muted)' }}>
-                Day Total
-              </span>
-              <span className="text-2xl font-bold" style={{ color: 'var(--accent-secondary)' }}>
-                {CURRENCY_SYMBOL}{expenses.grand_total.toFixed(0)}
-              </span>
-            </div>
-          </div>
+          <DayTotalCard date={date} dayTotal={expenses.grand_total} />
         )}
 
         {/* Budget Limit */}

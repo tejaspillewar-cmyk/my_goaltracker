@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useAddOtherExpense, useDeleteOtherExpense } from '@/hooks/use-expenses';
-import { isWithinEditWindow } from '@/lib/utils/date';
 import { CURRENCY_SYMBOL } from '@/lib/utils/constants';
-import { useAuth } from '@/hooks/use-auth';
 import type { ExpenseOther } from '@/types';
 
 interface OtherExpenseCardProps {
@@ -18,7 +16,6 @@ interface OtherExpenseCardProps {
 }
 
 export function OtherExpenseCard({ category, label, emoji, date, expenses }: OtherExpenseCardProps) {
-  const { isAdmin } = useAuth();
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [showInput, setShowInput] = useState(false);
@@ -26,7 +23,7 @@ export function OtherExpenseCard({ category, label, emoji, date, expenses }: Oth
   const addExpense = useAddOtherExpense();
   const deleteExpense = useDeleteOtherExpense();
 
-  const editable = isAdmin || isWithinEditWindow(date);
+  const editable = true; // expenses are always editable regardless of date
   const total = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
 
   const handleAddExpense = async () => {

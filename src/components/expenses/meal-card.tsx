@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useAddMealItem, useDeleteMealItem, useCreateMealSession } from '@/hooks/use-expenses';
-import { isWithinEditWindow } from '@/lib/utils/date';
 import { CURRENCY_SYMBOL } from '@/lib/utils/constants';
-import { useAuth } from '@/hooks/use-auth';
 import type { ExpenseMeal, ExpenseMealItem } from '@/types';
 
 interface MealCardProps {
@@ -18,7 +16,6 @@ interface MealCardProps {
 }
 
 export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) {
-  const { isAdmin } = useAuth();
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [showInput, setShowInput] = useState(false);
@@ -27,7 +24,7 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
   const addItem = useAddMealItem();
   const deleteItem = useDeleteMealItem();
 
-  const editable = isAdmin || isWithinEditWindow(date);
+  const editable = true; // expenses are always editable regardless of date
   const items = meal?.expense_meal_items || [];
   const total = items.reduce((sum, item) => sum + Number(item.amount), 0);
 

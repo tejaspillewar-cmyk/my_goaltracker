@@ -180,6 +180,7 @@ function ExpensesCard({ expenses }: { expenses: { grand_total: number; meals: (E
 // ============================================================================
 function HabitsCard({ goals, entries, date }: { goals: Goal[]; entries: GoalEntry[]; date: string }) {
   const toggle = useToggleEntry();
+  const [pendingGoals, setPendingGoals] = useState<Set<string>>(new Set());
   const active = goals.filter(g => g.is_active);
   const checked = entries.filter(e => e.is_checked).length;
   const total = active.length;
@@ -210,12 +211,21 @@ function HabitsCard({ goals, entries, date }: { goals: Goal[]; entries: GoalEntr
               active.map(goal => {
                 const entry = entries.find(e => e.goal_id === goal.id);
                 const done = entry?.is_checked || false;
+                const isThisPending = pendingGoals.has(goal.id);
                 return (
                   <button
                     key={goal.id}
-                    onClick={e => { e.stopPropagation(); toggle.mutate({ goal_id: goal.id, entry_date: date, is_checked: !done }); }}
-                    disabled={toggle.isPending}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: toggle.isPending ? 'wait' : 'pointer', textAlign: 'left', padding: '2px 0', width: '100%', opacity: toggle.isPending ? 0.6 : 1 }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      if (isThisPending) return;
+                      setPendingGoals(prev => new Set(prev).add(goal.id));
+                      toggle.mutate(
+                        { goal_id: goal.id, entry_date: date, is_checked: !done },
+                        { onSettled: () => setPendingGoals(prev => { const n = new Set(prev); n.delete(goal.id); return n; }) }
+                      );
+                    }}
+                    disabled={isThisPending}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: isThisPending ? 'wait' : 'pointer', textAlign: 'left', padding: '2px 0', width: '100%', opacity: isThisPending ? 0.6 : 1 }}
                   >
                     <div style={{ width: 15, height: 15, borderRadius: 4, border: `1.5px solid ${done ? 'var(--accent-primary)' : 'rgba(255,255,255,0.2)'}`, background: done ? 'var(--accent-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
                       {done && <span style={{ color: '#000', fontSize: 8, fontWeight: 900, lineHeight: 1 }}>✓</span>}

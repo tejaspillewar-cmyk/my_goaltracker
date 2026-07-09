@@ -102,7 +102,65 @@ export function useToggleEntry() {
   return useMutation({
     mutationFn: (data: { goal_id: string; entry_date: string; is_checked: boolean }) =>
       postJSON('/api/entries', data),
-    onSuccess: (_data, variables) => {
+
+    // Optimistic update — apply change instantly before API returns
+    onMutate: async (variables) => {
+      const { goal_id, entry_date, is_checked } = variables;
+
+      // Cancel in-flight refetches so they don't overwrite our optimistic value
+      await queryClient.cancelQueries({ queryKey: ['entries', entry_date] });
+
+      // Snapshot current cache for rollback
+      const previousEntries = queryClient.getQueryData<GoalEntry[]>(['entries', entry_date]);
+
+      // Optimistically update ['entries', date]
+      queryClient.setQueryData<GoalEntry[]>(['entries', entry_date], (old = []) => {
+        const exists = old.find(e => e.goal_id === goal_id);
+        if (exists) {
+          return old.map(e => e.goal_id === goal_id ? { ...e, is_checked } : e);
+        }
+        // Entry doesn't exist yet — create a placeholder
+        return [...old, {
+          id: `optimistic-${goal_id}`,
+          user_id: '',
+          goal_id,
+          entry_date,
+          is_checked,
+          score_earned: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }];
+      });
+
+      // Also patch the matrix cache (habits page) so it feels instant there too
+      const [entryYear, entryMonth] = entry_date.split('-').map(Number);
+      const matrixKey = ['matrix', entryYear, entryMonth];
+      const previousMatrix = queryClient.getQueryData(matrixKey);
+      queryClient.setQueryData<{ goals: GoalEntry[]; entries: GoalEntry[]; dailyScores: unknown[] }>(matrixKey, (old) => {
+        if (!old) return old;
+        const entries = old.entries as GoalEntry[];
+        const exists = entries.find(e => e.goal_id === goal_id && e.entry_date === entry_date);
+        const newEntries = exists
+          ? entries.map(e => (e.goal_id === goal_id && e.entry_date === entry_date) ? { ...e, is_checked } : e)
+          : [...entries, { id: `optimistic-${goal_id}-${entry_date}`, user_id: '', goal_id, entry_date, is_checked, score_earned: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }];
+        return { ...old, entries: newEntries };
+      });
+
+      return { previousEntries, previousMatrix, matrixKey };
+    },
+
+    // Roll back on failure
+    onError: (_err, variables, context) => {
+      if (context?.previousEntries !== undefined) {
+        queryClient.setQueryData(['entries', variables.entry_date], context.previousEntries);
+      }
+      if (context?.previousMatrix !== undefined && context?.matrixKey) {
+        queryClient.setQueryData(context.matrixKey, context.previousMatrix);
+      }
+    },
+
+    // Refetch scores/leaderboard after the API confirms (not blocking the UI)
+    onSettled: (_data, _err, variables) => {
       queryClient.invalidateQueries({ queryKey: ['entries', variables.entry_date] });
       queryClient.invalidateQueries({ queryKey: ['dailyScore', variables.entry_date] });
       queryClient.invalidateQueries({ queryKey: ['matrix'] });

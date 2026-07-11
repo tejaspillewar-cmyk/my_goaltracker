@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Amount must be non-negative' }, { status: 400 });
     }
 
-    // 3-day window check
+    // 30-day window check
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     if (expense_date > today) {
       return NextResponse.json({ error: 'Cannot add expenses for future dates' }, { status: 400 });
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     if (userData.role !== 'admin') {
       const todayDate = new Date(today + 'T00:00:00+05:30');
       const cutoff = new Date(todayDate);
-      cutoff.setDate(cutoff.getDate() - 2);
+      cutoff.setDate(cutoff.getDate() - 30);
       const cutoffStr = cutoff.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
 
       if (expense_date < cutoffStr) {

@@ -363,18 +363,15 @@ export async function GET(req: NextRequest) {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Expenses');
 
-  const buffer: Uint8Array = XLSX.write(wb, {
-    type: 'buffer',
+  const arrayBuffer: ArrayBuffer = XLSX.write(wb, {
+    type: 'array',
     bookType: 'xlsx',
     cellStyles: true,
   });
 
   const filename = `expenses-${from}-to-${to}.xlsx`;
-  const blob = new Blob([buffer], {
-    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  });
 
-  return new NextResponse(blob, {
+  return new NextResponse(arrayBuffer, {
     headers: {
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

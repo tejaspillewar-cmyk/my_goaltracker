@@ -363,7 +363,7 @@ export async function GET(req: NextRequest) {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Expenses');
 
-  const buffer: Buffer = XLSX.write(wb, {
+  const buffer: Uint8Array = XLSX.write(wb, {
     type: 'buffer',
     bookType: 'xlsx',
     cellStyles: true,

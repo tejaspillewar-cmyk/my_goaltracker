@@ -9,6 +9,7 @@ import { MealCard } from '@/components/expenses/meal-card';
 import { BudgetLimitCard } from '@/components/expenses/budget-limit-card';
 import { DayTotalCard } from '@/components/expenses/day-total-card';
 import { OtherExpenseCard } from '@/components/expenses/other-expense-card';
+import { ReportDownload } from '@/components/expenses/report-download';
 import { useExpenses } from '@/hooks/use-expenses';
 import { useAuth } from '@/hooks/use-auth';
 import { getISTToday, formatISTDate, getDayNameFull } from '@/lib/utils/date';
@@ -125,6 +126,9 @@ export default function ExpensesPage() {
             );
           })}
         </div>
+
+        {/* Report Download */}
+        <ReportDownload />
 
         {/* Other Expenses */}
         {!isLoading && expenses && (

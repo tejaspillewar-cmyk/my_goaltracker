@@ -41,21 +41,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Amount must be non-negative' }, { status: 400 });
     }
 
-    // 30-day window check
+    // Only block future dates
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
     if (expense_date > today) {
       return NextResponse.json({ error: 'Cannot add expenses for future dates' }, { status: 400 });
-    }
-
-    if (userData.role !== 'admin') {
-      const todayDate = new Date(today + 'T00:00:00+05:30');
-      const cutoff = new Date(todayDate);
-      cutoff.setDate(cutoff.getDate() - 30);
-      const cutoffStr = cutoff.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-
-      if (expense_date < cutoffStr) {
-        return NextResponse.json({ error: 'This date is locked.' }, { status: 403 });
-      }
     }
 
     const { data: expense, error } = await supabase

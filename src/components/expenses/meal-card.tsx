@@ -19,6 +19,7 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [showInput, setShowInput] = useState(false);
+  const [error, setError] = useState('');
 
   const createSession = useCreateMealSession();
   const addItem = useAddMealItem();
@@ -30,28 +31,33 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
 
   const handleAddItem = async () => {
     if (!newDesc.trim() || !newAmount) return;
+    setError('');
 
-    let mealId = meal?.id;
+    try {
+      let mealId = meal?.id;
 
-    // Create meal session if it doesn't exist
-    if (!mealId) {
-      const session = await createSession.mutateAsync({
-        expense_date: date,
-        meal_type: mealType,
+      // Create meal session if it doesn't exist
+      if (!mealId) {
+        const session = await createSession.mutateAsync({
+          expense_date: date,
+          meal_type: mealType,
+        });
+        mealId = (session as { id: string }).id;
+      }
+
+      await addItem.mutateAsync({
+        mealId,
+        description: newDesc.trim(),
+        amount: Number(newAmount),
+        date,
       });
-      mealId = (session as { id: string }).id;
+
+      setNewDesc('');
+      setNewAmount('');
+      setShowInput(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add item');
     }
-
-    await addItem.mutateAsync({
-      mealId,
-      description: newDesc.trim(),
-      amount: Number(newAmount),
-      date,
-    });
-
-    setNewDesc('');
-    setNewAmount('');
-    setShowInput(false);
   };
 
   const handleDeleteItem = async (itemId: string) => {
@@ -139,6 +145,9 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
                   style={{ flex: 1 }}
                 />
               </div>
+              {error && (
+                <p className="text-xs" style={{ color: 'var(--danger)' }}>{error}</p>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={handleAddItem}
@@ -152,7 +161,7 @@ export function MealCard({ mealType, label, emoji, date, meal }: MealCardProps) 
                   )}
                 </button>
                 <button
-                  onClick={() => { setShowInput(false); setNewDesc(''); setNewAmount(''); }}
+                  onClick={() => { setShowInput(false); setNewDesc(''); setNewAmount(''); setError(''); }}
                   className="btn-secondary btn-sm"
                 >
                   Cancel

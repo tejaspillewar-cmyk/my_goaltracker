@@ -127,9 +127,6 @@ export default function ExpensesPage() {
           })}
         </div>
 
-        {/* Report Download */}
-        <ReportDownload />
-
         {/* Other Expenses */}
         {!isLoading && expenses && (
           <div className="space-y-3 pt-4">
@@ -151,6 +148,9 @@ export default function ExpensesPage() {
             })}
           </div>
         )}
+
+        {/* Report Download — at bottom for easy access */}
+        <ReportDownload />
       </motion.div>
     </div>
   );

@@ -19,6 +19,7 @@ export function OtherExpenseCard({ category, label, emoji, date, expenses }: Oth
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [showInput, setShowInput] = useState(false);
+  const [error, setError] = useState('');
 
   const addExpense = useAddOtherExpense();
   const deleteExpense = useDeleteOtherExpense();
@@ -28,17 +29,22 @@ export function OtherExpenseCard({ category, label, emoji, date, expenses }: Oth
 
   const handleAddExpense = async () => {
     if (!newDesc.trim() || !newAmount) return;
+    setError('');
 
-    await addExpense.mutateAsync({
-      expense_date: date,
-      category,
-      description: newDesc.trim(),
-      amount: Number(newAmount),
-    });
+    try {
+      await addExpense.mutateAsync({
+        expense_date: date,
+        category,
+        description: newDesc.trim(),
+        amount: Number(newAmount),
+      });
 
-    setNewDesc('');
-    setNewAmount('');
-    setShowInput(false);
+      setNewDesc('');
+      setNewAmount('');
+      setShowInput(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add expense');
+    }
   };
 
   const handleDeleteExpense = async (id: string) => {
@@ -125,6 +131,9 @@ export function OtherExpenseCard({ category, label, emoji, date, expenses }: Oth
                   style={{ flex: 1 }}
                 />
               </div>
+              {error && (
+                <p className="text-xs" style={{ color: 'var(--danger)' }}>{error}</p>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={handleAddExpense}
@@ -138,7 +147,7 @@ export function OtherExpenseCard({ category, label, emoji, date, expenses }: Oth
                   )}
                 </button>
                 <button
-                  onClick={() => { setShowInput(false); setNewDesc(''); setNewAmount(''); }}
+                  onClick={() => { setShowInput(false); setNewDesc(''); setNewAmount(''); setError(''); }}
                   className="btn-secondary btn-sm"
                 >
                   Cancel

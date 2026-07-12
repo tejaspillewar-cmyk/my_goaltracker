@@ -370,8 +370,11 @@ export async function GET(req: NextRequest) {
   });
 
   const filename = `expenses-${from}-to-${to}.xlsx`;
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
 
-  return new NextResponse(buffer, {
+  return new NextResponse(blob, {
     headers: {
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
